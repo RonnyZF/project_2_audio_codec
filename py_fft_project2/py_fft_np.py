@@ -1,5 +1,5 @@
 # basado en https://jakevdp.github.io/blog/2013/08/28/understanding-the-fft/
-
+# https://towardsdatascience.com/fast-fourier-transform-937926e591cb
 import numpy as np
 
 
