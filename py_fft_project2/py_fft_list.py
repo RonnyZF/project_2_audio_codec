@@ -1,5 +1,4 @@
 import cmath
-import numpy
 
 # Handmade implementation of the Cooley-Tukey algorithm, from here: https://jeremykun.com/2012/07/18/the-fast-fourier-transform/
 # Make sure that input signal is a power of two!
@@ -20,24 +19,3 @@ def fft1(signal):
         combined[m] = Feven[m] + omega(n, -m) * Fodd[m]
         combined[m + n // 2] = Feven[m] - omega(n, -m) * Fodd[m]
      return combined
-
-# Simple samples
-s = [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
-
-fft_a = fft1(s)
-fft_b = numpy.fft.fft(s)
-
-# Same
-print(fft_a[3].real)
-print(fft_b[3].real)
-
-# Two sine waves, 40 Hz + 90 Hz
-t = numpy.linspace(0, 0.5, 2**10)
-s = numpy.sin(40 * 2 * numpy.pi * t) + 0.5 * numpy.sin(90 * 2 * numpy.pi * t)
-
-fft_a = fft1(s)
-fft_b = numpy.fft.fft(s)
-
-# Not the same
-print(fft_a[3].real)
-print(fft_b[3].real)
