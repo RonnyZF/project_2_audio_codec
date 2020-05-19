@@ -5,7 +5,6 @@ Se compila en la maquina virtual con el comandos:
   
 */
 
-
 #include <stdio.h>      /* Standard Library of Input and Output */
 #include <complex.h>    /* Standard Library of Complex Numbers */
 #include <math.h>
@@ -35,11 +34,11 @@ int init2 = 22; /*Esta variable es importante, lo que hace es similar a la
 void to_float(short* buff_short, float* buff_float, int len){
     int i;
     for (i = init2; i < len; i++){
-        //if(i%16 == 0){
-        //    printf("\n");
-        //}
+        if(i%16 == 0){
+            printf("\n");
+        }
         buff_float[i] = (float)(buff_short[i])/32768;
-        //printf("Num %d: 0x%02x -- %f\n",i,buff_short[i],buff_float[i]);
+        printf("Num %d: 0x%02x -- %f\n",i,buff_short[i],buff_float[i]);
     }
     init2 = 0; /*Luego de la primera corrida, se ha pasado el encabezado
                  y se baja la bandera*/
@@ -107,7 +106,7 @@ void fft(double complex *X, unsigned short EXP,double complex *W, unsigned short
     if (SCALE == 0){
         scale = 1.0;
     }
-    
+
     /* FFT butterfly */
     for (L=1; L<=EXP; L++){
         LE=1<<L; /* LE=2^L=points of sub DFT */
@@ -137,13 +136,14 @@ void fft_init (double complex *W, unsigned short EXP){
     for(L=1; L<=EXP; L++){
         LE  = 1<<L;  // LE=2^ points of sub DFT
         LE1 = LE>>1; // Number of butterflies in sub DFT
-        W[L-1] = cos(pi/LE1) + sin(pi/LE1) * I;
+        W[L-1] = cos(pi/LE1) - sin(pi/LE1) * I;
     }
 }
 
 
 int main(int argc, char *argv[]) {
 
+    //**********************************************************************************
     ///// Prueba numeros complejos
     double complex z1 = 1.0 + 3.0 * I;
     double complex z2 = 1.0 - 4.0 * I;
@@ -151,11 +151,14 @@ int main(int argc, char *argv[]) {
     printf("Prueba numeros complejos:\n");
     printf("Valores complejos: z1 = %.2f + %.2fi\t z2 = %.2f %+.2fi\n\n\n", creal(z1), cimag(z1), creal(z2), cimag(z2));
 
+    
+    //**********************************************************************************
     //// Prueba de funcion bit_rev
     printf("Prueba de inversion de entrada:\n");
 
     double complex *Set;
     short Num = 16;
+    short EXP = 4;
     Set = malloc((int)Num * sizeof(double complex));
 
     Set[0]  = 0;
@@ -175,42 +178,91 @@ int main(int argc, char *argv[]) {
     Set[14] = 14;
     Set[15] = 15;
     
-    bit_rev(Set,4);
+    bit_rev(Set,EXP);
     
     for (int n=0; n<Num; n++){
         printf("%.2f %+.2fi\n",creal(Set[n]),cimag(Set[n]));
     }
     printf("\n\n");
 
+
+    //**********************************************************************************
+    //// Prueba de funcion fft_init 
+    printf("Prueba de generacion de matriz\n");
+    EXP = 4;
+    double complex *W;
+    W = malloc((int)EXP * sizeof(double complex));
     
+    fft_init(W, EXP);
+
+    for (int n=0; n<EXP; n++){
+        printf("%d: %.2f %+.2fi\n",n,creal(W[n]),cimag(W[n]));
+    }
+    printf("\n\n");
+
+    
+    //**********************************************************************************
     //// Prueba de lectura de archivos wav
     FILE * file;
     file = fopen ("Data_OUT.csv", "w");
     fclose(file);
 
-    float buffer_Float[1024] = {0};
-    short buffer_Short[1024] = {0};
+    int Muestras = 16 + 22;
+    float buffer_Float[Muestras];
+    short buffer_Short[Muestras];
 
     FILE *fp = fopen("test.wav", "r");
     
-    if (fp != NULL) {
+    //Para probar la FFT se comenta el loop y solo se hace pasar las 16 muestras mas los 22 muestras de cabeza
+    //if (fp != NULL) {
         size_t byte_read;
-        do{
+    //    do{
             /*Cantidad de muestras leidas = fread(Destino de lectura, 
                                                   tamaño de bit, 
                                                   cantidad de muestras maxima,
                                                   archivo)*/
 
-            byte_read = fread(buffer_Short,sizeof(short),1024,fp);
+            byte_read = fread(buffer_Short,sizeof(short),Muestras,fp);
             to_float(buffer_Short, buffer_Float, byte_read);
             save_csv(buffer_Float,byte_read);
-        }while(byte_read > 0); 
+    //    }while(byte_read > 0); 
         //Mietras se siga leyendo datos se seguira ejecutando el while
 
         printf("Se ha escrito el csv!, se llama Data_OUT.csv\n\n\n");
         fclose(fp); //Se cierra el archivo cuando se termina de leer
+    //}
+
+    /*
+    printf("Num 0 : 0x%02x -- %f\n",buffer_Short[0],buffer_Float[0]);
+    printf("Num 5 : 0x%02x -- %f\n",buffer_Short[5],buffer_Float[5]);
+    printf("Num 10: 0x%02x -- %f\n",buffer_Short[10],buffer_Float[10]);
+    printf("Num 20: 0x%02x -- %f\n",buffer_Short[20],buffer_Float[20]);
+    */
+
+    //**********************************************************************************
+    //// Prueba de funcion fft 
+    printf("Prueba de FFT\n");
+
+    EXP = 4;
+    Num = 16;
+    double complex *W_FFT;
+    double complex *FFT;
+
+    W_FFT = malloc((int)EXP * sizeof(double complex));
+    FFT   = malloc((int)Num * sizeof(double complex));
+
+    for (int i = 22; i < (22+Num); i++){
+        FFT[i-22] = buffer_Float[i];
     }
 
+    bit_rev(FFT,EXP);
+    fft_init(W, EXP);
+    fft(FFT, EXP, W, 0);
+    
+    for (int f=0; f<Num; f++){
+        printf("Num %d: %.4f %.4fi\n",f,creal(FFT[f]),cimag(FFT[f]));
+    }
+    printf("\n\n");
 
     return 0;
 }
