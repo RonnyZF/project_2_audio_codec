@@ -22,6 +22,7 @@ char* FFT_TO_WAV  = "Encoder.wav";
 char* WAV_TO_CSV  = "Input.csv";
 char* FFT_TO_CSV  = "Encoder.csv";
 char* IFFT_TO_CSV = "Decoder.csv";
+char* OUT = "out.wav";
 
 //Banderas
 int FIXED = 8;
@@ -209,6 +210,28 @@ void save_fft(double complex* buff_complex, int len){
     //}
     fclose(file); 
 }
+
+
+void save_wav(double complex *buff_float, int len){
+    FILE * file;
+    file = fopen (OUT, "a");
+    
+    short var;
+
+    char* progbar="-/|\\";
+    int progidx=0;
+
+    for (int i=0; i<len;i++){
+        var = (short)flo_to_fix(creal(buff_float[i]),15);
+        fwrite(&var, sizeof(short), 1, file);
+
+        printf("%c\r",progbar[progidx++&3]);
+        fflush(stdout);
+    }
+
+    fclose(file); 
+}
+
 
 //***********************************************************************
 //**********                 FUNCIONES PARA FFT                **********
@@ -464,6 +487,10 @@ int main(int argc, char *argv[]) {
         fileFFT_csv = fopen (FFT_TO_CSV, "w");
         fclose(fileFFT_csv);
 
+        FILE * fileOUT;
+        fileOUT = fopen (OUT, "w");
+        fclose(fileOUT);
+
         FILE *fpFFT = fopen(Lectura, "r");
         fft_init(W, EXP);//Se inicializa los coeficientes de la FFT
         //Para probar la FFT se comenta el loop y solo se hace pasar las 16 muestras mas los 22 muestras de cabeza
@@ -483,7 +510,7 @@ int main(int argc, char *argv[]) {
                     bit_rev(buffer_FloatFFT,EXP);
                     ifft(buffer_FloatFFT, EXP, W, 1);
                     save_csv(buffer_FloatFFT,Num);
-                    //save_fft_csv(buffer_FloatFFT, Num);
+                    save_wav(buffer_FloatFFT, Num);
                 }
 
             }while(byte_readFFT > 0); 
