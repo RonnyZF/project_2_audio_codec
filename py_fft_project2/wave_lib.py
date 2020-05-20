@@ -1,12 +1,12 @@
 import wave, struct
 
-def guardar_wave(file_name, arreglo=None, sampleRate=44100):
+def guardar_wave(file_name, arreglo=None, sampleRate=44100,width=2):
     obj = wave.open(file_name,'w')
     obj.setnchannels(1) # mono
-    obj.setsampwidth(2) # 2 Bytes = 16 bits
+    obj.setsampwidth(width) # 2 Bytes = 16 bits
     obj.setframerate(sampleRate)
     for i in arreglo:
-       data = struct.pack('<h', i)
+       data = struct.pack('<h', int(i))
        obj.writeframesraw( data )
     obj.close()
 
@@ -25,7 +25,3 @@ def leer_wave(file_name):
         wave_list.append(data[0])
     waveFile.close()
     return channels,width,frame_rate,number_of_frames,parameters,wave_list
-
-wav = leer_wave(file_name='leer.wav')
-
-guardar_wave('salvar.wav',arreglo=wav,sampleRate=8000)
