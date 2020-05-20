@@ -24,7 +24,7 @@ char* FFT_TO_CSV  = "Encoder.csv";
 char* IFFT_TO_CSV = "Decoder.csv";
 
 //Banderas
-int FIXED = 1;
+int FIXED = 8;
 //int init3 = 22;
 int init2 = 22; /*Esta variable es importante, lo que hace es evitar que se 
                   guarden las variables de cabeza en el csv generado*/
@@ -72,6 +72,15 @@ int flo_to_fix(double f, int e){
     /*Lo que se hace es simplemente multiplicar el numero 
     original multiplicado por 2 elevado a la e*/
     double a = f* (pow(2,e));
+
+    if (a >= 127){
+        a = 127;
+    }
+
+    if (a <= -127){
+        a = -127;
+    }
+
     int b = (int)(round(a));
     
     if (a < 0){
@@ -258,7 +267,7 @@ void ifft(double complex *X, unsigned short EXP,double complex *W, unsigned shor
     for(int i=0;i<N;i++){
         //printf("Num %d: %f + %f i\n",i,creal(X[i]),cimag(X[i]));
         
-        X[i] = conj(X[i])/N;
+        X[i] = conj(X[i])*N;
         
         //printf("Num %d: %f + %f i\n\n",i,creal(X[i]),cimag(X[i]));
     }
@@ -423,7 +432,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 bit_rev(FFT,EXP);
-                fft(FFT, EXP, W, 0);
+                fft(FFT, EXP, W, 1);
                 save_fft(FFT, Num);
                 //save_fft_csv(FFT, Num);
                 count++;
@@ -472,7 +481,7 @@ int main(int argc, char *argv[]) {
                 if (byte_readFFT > 0){
                     save_fft_csv(buffer_FloatFFT, Num);
                     bit_rev(buffer_FloatFFT,EXP);
-                    ifft(buffer_FloatFFT, EXP, W, 0);
+                    ifft(buffer_FloatFFT, EXP, W, 1);
                     save_csv(buffer_FloatFFT,Num);
                     //save_fft_csv(buffer_FloatFFT, Num);
                 }
