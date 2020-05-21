@@ -20,7 +20,7 @@ Se compila en la maquina virtual con el comandos:
 //Modificar
 
 char * encoder = "decodificar";
-char * Lectura = "Encoder_Ronny.wav";
+char * Lectura = "Encoder.wav";
 
 //char * encoder = "codificar";
 //char * Lectura = "Test.wav";
@@ -55,6 +55,32 @@ int init  = 22; /*Esta variable es importante, lo que hace es similar a la
 //***********************************************************************
 //**********         FUNCIONES PARA PASAR A PUNTO FIJO         **********
 //***********************************************************************
+
+float fix_to_flo_Forced(int x, int e){
+    // f es el numero en punto fijo de tipo int
+    // e es la cantidad de bits que se le dio la seccion decimal
+    double f;
+    int sign;
+    int c;
+
+    c = abs(x);
+    sign = 1;
+    
+    if (x > 128){
+    /* Las siguientes 3 lineas es para devolverlo del complemento a 2 
+        si el numero original era negativo */ 
+
+        c = x - 1; 
+        c = ~c;
+        sign = -1;
+    }
+
+    /*Lo que se hace es simplemente multiplicar el numero 
+    en punto fijo dividido por 2 elevado a la e*/
+    f = (1.0 * c)/(1<<e);
+    f = f * sign;
+    return f;
+}
 
 float fix_to_flo(int x, int e){
     // f es el numero en punto fijo de tipo int
@@ -128,24 +154,24 @@ void char_to_complex(char* buff_char, Complex* buff_complex, int len){
         double puente_im[64];
         Complex Aux[64];
 
-        puente_re[0] = fix_to_flo((int)buff_char[0],FIXED);
-        puente_im[0] = fix_to_flo((int)buff_char[1],FIXED);
+        puente_re[0] = fix_to_flo_Forced((int)buff_char[0],FIXED);
+        puente_im[0] = fix_to_flo_Forced((int)buff_char[1],FIXED);
         Aux[0].re = (int)buff_char[0];
         Aux[0].im = (int)buff_char[1];
 
-        puente_re[32] = fix_to_flo((int)buff_char[64],FIXED);
-        puente_im[32] = fix_to_flo((int)buff_char[65],FIXED);
-        Aux[32].re = buff_char[64];
-        Aux[32].im = buff_char[65];
+        puente_re[32] = fix_to_flo_Forced((int)buff_char[64],FIXED);
+        puente_im[32] = fix_to_flo_Forced((int)buff_char[65],FIXED);
+        Aux[32].re = (int)buff_char[64];
+        Aux[32].im = (int)buff_char[65];
 
         for (int i = 2; i < 64; i = i+2){
-            puente_re[i/2] = fix_to_flo((int)buff_char[i],FIXED);
-            puente_im[i/2] = fix_to_flo((int)buff_char[i + 1],FIXED);
+            puente_re[i/2] = fix_to_flo_Forced((int)buff_char[i],FIXED);
+            puente_im[i/2] = fix_to_flo_Forced((int)buff_char[i + 1],FIXED);
             Aux[i/2].re = (int)buff_char[i];
             Aux[i/2].im = (int)buff_char[i+1];
 
-            puente_re[64-i/2] =   fix_to_flo((int)buff_char[i],FIXED);
-            puente_im[64-i/2] = - fix_to_flo((int)buff_char[i + 1],FIXED);
+            puente_re[64-i/2] =   fix_to_flo_Forced((int)buff_char[i],FIXED);
+            puente_im[64-i/2] = - fix_to_flo_Forced((int)buff_char[i + 1],FIXED);
             Aux[64 - i/2].re = (int)buff_char[i];
             Aux[64 - i/2].im = (int)buff_char[i+1];
         }
@@ -154,6 +180,7 @@ void char_to_complex(char* buff_char, Complex* buff_complex, int len){
             buff_complex[i].re = flo_to_fix(puente_re[i],15);
             buff_complex[i].im = flo_to_fix(puente_im[i],15);
         }
+        
         for (int j = 0; j < 64; j++){
             printf("Num original %d: %ld + %ldi\n" ,j,Aux[j].re               ,Aux[j].im);
             printf("Num original %d: %f + %fi\n"   ,j,(double)Aux[j].re/(1<<8),(double)Aux[j].im/(1<<8));
@@ -408,9 +435,9 @@ int main() {
     buffer_ShortFFT   = malloc((int)MuestrasFFT * sizeof(char));
     buffer_ComplexFFT = malloc((int)Muestras    * sizeof(Complex));
 
-    //buffer_Complex  = malloc((int)Muestras * sizeof(Complex));
-    //buffer_Short    = malloc((int)Muestras * sizeof(short));
-    //FFT             = malloc((int)Muestras * sizeof(Complex));
+    buffer_Complex  = malloc((int)Muestras * sizeof(Complex));
+    buffer_Short    = malloc((int)Muestras * sizeof(short));
+    FFT             = malloc((int)Muestras * sizeof(Complex));
     
     W               = malloc((int)EXP * sizeof(Complex));
 
