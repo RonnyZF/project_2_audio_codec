@@ -61,7 +61,7 @@ float fix_to_flo(int x, int e){
 
     /*Lo que se hace es simplemente multiplicar el numero 
     en punto fijo dividido por 2 elevado a la e*/
-    f = (1.0 * c) / (pow(2,e));
+    f = (1.0 * c)/(1<<e);
     f = f * sign;
     return f;
 }
@@ -72,7 +72,7 @@ int flo_to_fix(double f, int e){
 
     /*Lo que se hace es simplemente multiplicar el numero 
     original multiplicado por 2 elevado a la e*/
-    double a = f* (pow(2,e));
+    double a = f*(1<<e);
 
     if (a >= 127){
         a = 127;
@@ -417,6 +417,14 @@ int main(int argc, char *argv[]) {
     char * Lectura = argv[2];
     printf("Se desea %s el documento -> %s\n\n",encoder,Lectura);
 
+
+    unsigned short L,LE,LE1;
+    for(L=1; L<=EXP; L++){
+        LE  = 1<<L;  // LE=2^ points of sub DFT
+        LE1 = LE>>1; // Number of butterflies in sub DFT
+        W[L-1] = cos(pi/LE1) - sin(pi/LE1) * I;
+    }
+
     //Codificador
     if(encoder == "codificar"){
         
@@ -434,7 +442,7 @@ int main(int argc, char *argv[]) {
         FILE *fp = fopen(Lectura, "r");
         printf("ENCODER\n");  
 
-        fft_init(W, EXP);//Se inicializa los coeficientes de la FFT
+        //fft_init(W, EXP);//Se inicializa los coeficientes de la FFT
         //Para probar la FFT se comenta el loop y solo se hace pasar las 16 muestras mas los 22 muestras de cabeza
         int count = 0;
         if (fp != NULL) {
@@ -492,7 +500,7 @@ int main(int argc, char *argv[]) {
         fclose(fileOUT);
 
         FILE *fpFFT = fopen(Lectura, "r");
-        fft_init(W, EXP);//Se inicializa los coeficientes de la FFT
+        //fft_init(W, EXP);//Se inicializa los coeficientes de la FFT
         //Para probar la FFT se comenta el loop y solo se hace pasar las 16 muestras mas los 22 muestras de cabeza
         if (fpFFT != NULL) {
             size_t byte_readFFT;
