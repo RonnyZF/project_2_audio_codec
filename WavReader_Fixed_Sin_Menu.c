@@ -459,7 +459,7 @@ int main() {
         //Lectura del wav original para ser codificado
         int count = 0;
         if (fp != NULL) {
-            size_t byte_read;
+            int byte_read;
             printf("Escribiendo:\n");
             do{
                 /*Cantidad de muestras leidas = fread(Destino de lectura,
@@ -515,7 +515,7 @@ int main() {
 
         //Para probar la FFT se comenta el loop y solo se hace pasar las 16 muestras mas los 22 muestras de cabeza
         if (fpFFT != NULL) {
-            size_t byte_readFFT;
+            int byte_readFFT;
             printf("Escribiendo:\n");
             do{
                 //Cantidad de muestras leidas = fread(Destino de lectura,
