@@ -20,7 +20,7 @@ Se compila en la maquina virtual con el comandos:
 //Modificar
 
 char * encoder = "decodificar";
-char * Lectura = "Encoder.wav";
+char * Lectura = "Encoder_Ronny.wav";
 
 //char * encoder = "codificar";
 //char * Lectura = "Test.wav";
@@ -123,27 +123,31 @@ void short_to_complex(short* buff_short, Complex* buff_complex, int len){
 
 void char_to_complex(char* buff_char, Complex* buff_complex, int len){
 
-    double puente_re[len - 2];
-    double puente_im[len - 2];
+    if(len > 0){
+        double puente_re[len - 2];
+        double puente_im[len - 2];
 
-    puente_re[0] = fix_to_flo(buff_char[0],FIXED);
-    puente_im[0] = fix_to_flo(buff_char[1],FIXED);
+        puente_re[0] = fix_to_flo(buff_char[0],FIXED);
+        puente_im[0] = fix_to_flo(buff_char[1],FIXED);
 
-    puente_re[(len-1)/2] = fix_to_flo(buff_char[len-2],FIXED);
-    puente_im[(len-1)/2] = fix_to_flo(buff_char[len-1],FIXED);
+        puente_re[32] = fix_to_flo(buff_char[64],FIXED);
+        puente_im[32] = fix_to_flo(buff_char[65],FIXED);
 
-    for (int i = 2; i < len-2; i = i+2){
-        puente_re[i/2] = fix_to_flo(buff_char[i],FIXED);
-        puente_im[i/2] = fix_to_flo(buff_char[i + 1],FIXED);
+        for (int i = 2; i < 64; i = i+2){
+            puente_re[i/2] = fix_to_flo(buff_char[i],FIXED);
+            puente_im[i/2] = fix_to_flo(buff_char[i + 1],FIXED);
 
-        puente_re[len-i/2-2] =   fix_to_flo(buff_char[i],FIXED);
-        puente_im[len-i/2-2] = - fix_to_flo(buff_char[i + 1],FIXED);
+            puente_re[64-i/2] =   fix_to_flo(buff_char[i],FIXED);
+            puente_im[64-i/2] = - fix_to_flo(buff_char[i + 1],FIXED);
+        }
+
+        for (int i = 0; i < 64; i++){
+            buff_complex[i].re = flo_to_fix(puente_re[i],15);
+            buff_complex[i].im = flo_to_fix(puente_im[i],15);
+        }
     }
 
-    for (int i = 0; i < len-2; i++){
-        buff_complex[i].re = flo_to_fix(puente_re[i],15);
-        buff_complex[i].im = flo_to_fix(puente_im[i],15);
-    }
+    else{}
     /*
     for (int j = 0; j < len - 2; j++){
         printf("Num %d: %f + %fi\n",j,creal(buff_complex[j]), cimag(buff_complex[j]));
@@ -266,7 +270,7 @@ void fft(Complex *X, unsigned short EXP,Complex *W, unsigned short SCALE,int Fix
 
     /* FFT butterfly */
     for (L=1; L<=EXP; L++){
-        LE  = 1<<L;            /* LE=2^L=points of sub DFT */
+        LE  = 1<<L;           /* LE=2^L=points of sub DFT */
         LE1 = LE>>1;          /* Number of butterflies in sub-DFT */
         
         U_re = 1.0*(1<<Fix);
@@ -390,9 +394,10 @@ int main() {
     buffer_ShortFFT   = malloc((int)MuestrasFFT * sizeof(char));
     buffer_ComplexFFT = malloc((int)Muestras    * sizeof(Complex));
 
-    buffer_Complex  = malloc((int)Muestras * sizeof(Complex));
-    buffer_Short    = malloc((int)Muestras * sizeof(short));
-    FFT             = malloc((int)Muestras * sizeof(Complex));
+    //buffer_Complex  = malloc((int)Muestras * sizeof(Complex));
+    //buffer_Short    = malloc((int)Muestras * sizeof(short));
+    //FFT             = malloc((int)Muestras * sizeof(Complex));
+    
     W               = malloc((int)EXP * sizeof(Complex));
 
 
@@ -480,7 +485,6 @@ int main() {
                 byte_readFFT = fread(buffer_ShortFFT,sizeof(char),MuestrasFFT,fpFFT);
                 char_to_complex(buffer_ShortFFT, buffer_ComplexFFT, byte_readFFT);
                 if (byte_readFFT > 0){
-                    //save_fft_csv(buffer_ComplexFFT, Muestras);
                     
                     bit_rev(buffer_ComplexFFT,EXP);
                     ifft(buffer_ComplexFFT, EXP, W, 1,15);
@@ -488,7 +492,7 @@ int main() {
                     save_wav(buffer_ComplexFFT, Muestras);
                 }
 
-            }while(byte_readFFT > 0); 
+            }while(byte_readFFT > 0);
             //Mietras se siga leyendo datos se seguira ejecutando el while
 
             printf("Se ha escrito el csv con la FFT decodificada!, se llama %s\n",IFFT_TO_CSV);
