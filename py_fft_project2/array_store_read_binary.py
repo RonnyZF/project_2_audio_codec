@@ -48,9 +48,9 @@ def leer_binario(filename):
         data = f.read()
     return struct.iter_unpack('<hh',data)
 
-def store_coeffs(filename, n,fixed_e = 10):
+def store_coeffs(filename, dato,fixed_e = 10):
     os.remove(filename)
-    for nn in n:
+    for nn in dato:
         coef_towrite= coeficiente._make([to_fixed(f=nn.real,e=fixed_e), to_fixed(f=nn.imaginario,e=fixed_e)])
         escribir_binario(filename=filename, data_h=coef_towrite.real,data_l=coef_towrite.imaginario)
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     A = rand(100, 2).view(dtype=np.complex128)
 
     n = [coeficiente._make((i.real[-1], i.imag[-1])) for i in A]
-    store_coeffs(filename='file.mpx', n=n)
+    store_coeffs(filename='file.mpx', dato=n)
     recovered = read_coeffs(filename='file.mpx')
 
     assert all(np.isclose(A,recovered, atol=1e-03))
