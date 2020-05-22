@@ -6,6 +6,8 @@ from bitstring import BitStream, BitArray
 import math
 import os
 import numpy as np
+import os.path
+from os import path
 import wave, struct, math, random
 from collections import namedtuple
 
@@ -40,25 +42,27 @@ def to_fixed(f,e):
 
 def escribir_binario(filename, data_h, data_l):
     with open(filename, 'ab') as f:
-        data = struct.pack('<hh', data_h, data_l)
+        data = struct.pack('<ii', data_h, data_l)
         f.write(data)
 
 def leer_binario(filename):
     with open(filename, 'rb') as f:
         data = f.read()
-    return struct.iter_unpack('<hh',data)
+    return struct.iter_unpack('<ii',data)
 
-def store_coeffs(filename, dato,fixed_e = 10):
-    os.remove(filename)
-    for nn in dato:
+def store_coeffs(filename, dato,fixed_e = 16):
+    if path.exists(filename):
+        os.remove(filename)
+    n = [coeficiente._make((i.real, i.imag)) for i in dato]
+    for nn in n:
         coef_towrite= coeficiente._make([to_fixed(f=nn.real,e=fixed_e), to_fixed(f=nn.imaginario,e=fixed_e)])
         escribir_binario(filename=filename, data_h=coef_towrite.real,data_l=coef_towrite.imaginario)
 
-def read_coeffs(filename, fixed_e = 10):
+def read_coeffs(filename, fixed_e = 16):
     dato = leer_binario(filename=filename)
     coef = [coeficiente._make(i) for i in dato]
     coef_float = [coeficiente._make([to_float(i.real, fixed_e), to_float(i.imaginario, fixed_e)]) for i in coef]
-    return np.array(coef_float).view(dtype=np.complex128)
+    return np.array([i.real + i.imaginario*1j for i in coef_float])
 
 if __name__ == "__main__":
     """
@@ -68,12 +72,11 @@ if __name__ == "__main__":
     """
     from numpy.random import rand
     A = rand(100, 2).view(dtype=np.complex128)
-
-    n = [coeficiente._make((i.real[-1], i.imag[-1])) for i in A]
+    n = np.array([i[0] for i in A])
     store_coeffs(filename='file.mpx', dato=n)
     recovered = read_coeffs(filename='file.mpx')
 
-    assert all(np.isclose(A,recovered, atol=1e-03))
+    assert all(np.isclose(n,recovered, atol=1e-05))
 
     pass
 
