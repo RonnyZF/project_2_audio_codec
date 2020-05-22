@@ -19,11 +19,11 @@ Se compila en la maquina virtual con el comandos:
 
 //Modificar
 
-char * encoder = "decodificar";
-char * Lectura = "Encoder.wav";
+//char * encoder = "decodificar";
+//char * Lectura = "Encoder.wav";
 
-//char * encoder = "codificar";
-//char * Lectura = "Test.wav";
+char * encoder = "codificar";
+char * Lectura = "Test.wav";
 
 //*************************************************
 //*************************************************
@@ -66,7 +66,7 @@ float fix_to_flo_Forced(int x, int e){
     c = abs(x);
     sign = 1;
     
-    if (x > 128){
+    if (x > 127){
     /* Las siguientes 3 lineas es para devolverlo del complemento a 2 
         si el numero original era negativo */ 
 
@@ -191,9 +191,27 @@ void char_to_complex(char* buff_char, Complex* buff_complex, int len){
     }
 
     else{}
-    
-
 }
+
+void save_wav_csv(short* buff_short, int len){
+    FILE * file;
+    file = fopen (WAV_TO_CSV, "a");
+
+    char* progbar="-/|\\";
+    int progidx=0;
+    double buff_float;
+
+    for (int i=0; i<len; i++){
+        buff_float = (double)buff_short[i]/(1<<15);
+        fprintf(file, "%f\n", buff_float);
+
+        printf("%c\r",progbar[progidx++&3]);
+        fflush(stdout);
+    }
+
+    fclose(file); 
+}
+
 
 void save_csv(Complex* buff_complex, int len){
     FILE * file;
@@ -448,6 +466,10 @@ int main() {
         //**********************************************************************************
         // LIMPIEZA Y CREACION DE ARCHIVOS
 
+        FILE * file;
+        file = fopen (WAV_TO_CSV, "w");
+        fclose(file);
+        
         FILE * fileFFT;
         fileFFT = fopen (FFT_TO_WAV, "w");
         fclose(fileFFT);
@@ -469,6 +491,7 @@ int main() {
 
                 byte_read = fread(buffer_Short,sizeof(short),Muestras,fp);
                 short_to_complex(buffer_Short, buffer_Complex, byte_read);
+                save_wav_csv(buffer_Short,byte_read);
 
                 /*
                 for (int i = 0; i < Muestras; i++){
