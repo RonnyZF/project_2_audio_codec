@@ -153,24 +153,24 @@ void char_to_complex(char* buff_char, Complex* buff_complex, int len){
         double puente_im[64];
         Complex Aux[64];
 
-        puente_re[0] = fix_to_flo((int64_t)buff_char[0],FIXED);
-        puente_im[0] = fix_to_flo((int64_t)buff_char[1],FIXED);
+        puente_re[0] = fix_to_flo_Forced((int)buff_char[0],FIXED);
+        puente_im[0] = fix_to_flo_Forced((int)buff_char[1],FIXED);
         Aux[0].re = (int64_t)buff_char[0];
         Aux[0].im = (int64_t)buff_char[1];
 
-        puente_re[32] = fix_to_flo((int64_t)buff_char[64],FIXED);
-        puente_im[32] = fix_to_flo((int64_t)buff_char[65],FIXED);
+        puente_re[32] = fix_to_flo_Forced((int)buff_char[64],FIXED);
+        puente_im[32] = fix_to_flo_Forced((int)buff_char[65],FIXED);
         Aux[32].re = (int64_t)buff_char[64];
         Aux[32].im = (int64_t)buff_char[65];
 
         for (int i = 2; i < 64; i = i+2){
-            puente_re[i/2] = fix_to_flo((int64_t)buff_char[i],FIXED);
-            puente_im[i/2] = fix_to_flo((int64_t)buff_char[i + 1],FIXED);
+            puente_re[i/2] = fix_to_flo_Forced((int)buff_char[i],FIXED);
+            puente_im[i/2] = fix_to_flo_Forced((int)buff_char[i + 1],FIXED);
             Aux[i/2].re = (int64_t)buff_char[i];
             Aux[i/2].im = (int64_t)buff_char[i+1];
 
-            puente_re[64-i/2] =   fix_to_flo((int64_t)buff_char[i],FIXED);
-            puente_im[64-i/2] = - fix_to_flo((int64_t)buff_char[i + 1],FIXED);
+            puente_re[64-i/2] =   fix_to_flo_Forced((int)buff_char[i],FIXED);
+            puente_im[64-i/2] = - fix_to_flo_Forced((int)buff_char[i + 1],FIXED);
             Aux[64 - i/2].re = (int64_t)buff_char[i];
             Aux[64 - i/2].im = (int64_t)buff_char[i+1];
         }
@@ -181,7 +181,7 @@ void char_to_complex(char* buff_char, Complex* buff_complex, int len){
         }
         
         for (int j = 0; j < 64; j++){
-            printf("Num original %d: %f + %fi\n" ,j,fix_to_flo_Forced(buff_char[2],FIXED), fix_to_flo_Forced(buff_char[3],FIXED));
+            printf("Num original %d: %f + %fi\n"   ,j,fix_to_flo_Forced(buff_char[2],FIXED), fix_to_flo_Forced(buff_char[3],FIXED));
             printf("Num original %d: %ld + %ldi\n" ,j,Aux[j].re               ,Aux[j].im);
             printf("Num original %d: %f + %fi\n"   ,j,(double)Aux[j].re/(1<<8),(double)Aux[j].im/(1<<8));
             printf("Num puente   %d: %f + %fi\n"   ,j,puente_re[j]      , puente_im[j]);
