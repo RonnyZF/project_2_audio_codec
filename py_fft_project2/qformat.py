@@ -32,6 +32,7 @@ def to_fixed(f,e):
 if __name__ == "__main__":
     from bitstring import BitStream, BitArray
     import math
+    import numpy as np
     import wave, struct, math, random
     from collections import namedtuple
     coeficiente = namedtuple('coeficiente', 'real imaginario')
@@ -46,13 +47,14 @@ if __name__ == "__main__":
         with open(filename, 'rb') as f:
             data = f.read()
         return struct.iter_unpack('<hh',data)
-    n = [1,2,3]
-    i = 12
+    n = np.random.uniform(-31,31,10).tolist()
+    fixed_e = 10
     for nn in n:
-        coef_towrite= coeficiente._make([to_fixed(f=nn,e=i), to_fixed(f=-nn,e=i)])
+        coef_towrite= coeficiente._make([to_fixed(f=nn,e=fixed_e), to_fixed(f=-nn,e=fixed_e)])
         escribir_binario(filename='file.mpx', data_h=coef_towrite.real,data_l=coef_towrite.imaginario)
 
     dato = leer_binario(filename='file.mpx')
     coef = [coeficiente._make(i) for i in dato]
+    coef_float = [coeficiente._make([to_float(i.real, fixed_e), to_float(i.imaginario, fixed_e)]) for i in coef]
     pass
 
