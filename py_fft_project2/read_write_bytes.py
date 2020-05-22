@@ -12,18 +12,11 @@ def complex_array_binary_read(file_name):
     data = []
     convert = lambda x: int.from_bytes(x, "little")
     with open(file_name, 'r+b') as f:
-
-        # Do stuff with byte.
         for ch in iter(lambda: f.read(1), ""):
             if ch == b'':
                 break
             data.append(convert(ch))
-        data = np.array(data).reshape((len(data)//2),2)
-
-        pass
-        pass
-
-    return data
+    return np.array(data).reshape((len(data)//2),2)
 
 Z = np.random.randint(low=0,high=(2**8)-1,size=10) + np.random.randint(low=0,high=(2**8)-1,size=10) * 1j
 

@@ -28,3 +28,31 @@ def to_fixed(f,e):
         b = ~b
         b = b + 1
     return b
+
+if __name__ == "__main__":
+    from bitstring import BitStream, BitArray
+    import math
+    import wave, struct, math, random
+    from collections import namedtuple
+    coeficiente = namedtuple('coeficiente', 'real imaginario')
+
+
+    def escribir_binario(filename, data_h, data_l):
+        with open(filename, 'ab') as f:
+            data = struct.pack('<hh', data_h, data_l)
+            f.write(data)
+
+    def leer_binario(filename):
+        with open(filename, 'rb') as f:
+            data = f.read()
+        return struct.iter_unpack('<hh',data)
+    n = [1,2,3]
+    i = 12
+    for nn in n:
+        coef_towrite= coeficiente._make([to_fixed(f=nn,e=i), to_fixed(f=-nn,e=i)])
+        escribir_binario(filename='file.mpx', data_h=coef_towrite.real,data_l=coef_towrite.imaginario)
+
+    dato = leer_binario(filename='file.mpx')
+    coef = [coeficiente._make(i) for i in dato]
+    pass
+
