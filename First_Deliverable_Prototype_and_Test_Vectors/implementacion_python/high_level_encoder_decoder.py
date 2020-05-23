@@ -1,20 +1,19 @@
 # imports
 import math
 import numpy as np
-from First_Deliverable_Prototype_and_Test_Vectors.implementacion_python import leer_wave,guardar_wave
-from First_Deliverable_Prototype_and_Test_Vectors.implementacion_python import store_coeffs, read_coeffs
+from First_Deliverable_Prototype_and_Test_Vectors.implementacion_python.wave_lib import leer_wave,guardar_wave
+from First_Deliverable_Prototype_and_Test_Vectors.implementacion_python.array_store_read_binary import store_coeffs, read_coeffs
 
 # constantes
 coder_level = 'float16'
 
 settings = {
-    'float16': {'factor_escala': 22,'fixed_e' : '','width_coded':'<ee'}
+    'float16': {'factor_escala': 22,'width_coded':'<ee'}
            }
 factor_escala = settings[coder_level]['factor_escala']
-fixed_e = settings[coder_level]['fixed_e']
 width_coded = settings[coder_level]['width_coded']
 
-*_,data = leer_wave('../audio_samples_8kHz/sample_1-8kHz.wav')
+*_,data = leer_wave('../../audio_samples_8kHz/sample_1-8kHz.wav')
 data=np.array(data)
 size = math.log(data.shape[0],2)
 # recorte para muestras de tamaño de potencias de 2
@@ -35,9 +34,11 @@ plt.plot(fft_vector.imag)
 plt.grid()
 plt.show()
 
+archivo_vectores = 'vectores.mpx'
+
 h, _ = np.split(fft_vector,2)
-store_coeffs(filename='file.mpx', dato=h,width_coded=width_coded)
-recovered = read_coeffs(filename='file.mpx',width_coded=width_coded)
+store_coeffs(filename=archivo_vectores, dato=h,width_coded=width_coded)
+recovered = read_coeffs(filename=archivo_vectores,width_coded=width_coded)
 recovered = np.concatenate((recovered,recovered[::-1].conj()))
 
 ifft_vector = np.real(np.fft.ifft(recovered))
