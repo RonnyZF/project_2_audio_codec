@@ -6,9 +6,7 @@ from py_fft_project2.plot import plot_fft, plot_signal
 from py_fft_project2.array_store_read_binary import store_coeffs, read_coeffs
 
 # constantes
-
-
-coder_level = 32
+coder_level = 16
 
 settings = {
     32: {'factor_escala': 22,'fixed_e' : 16,'width_coded':'<ii'},

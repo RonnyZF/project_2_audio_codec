@@ -42,7 +42,9 @@ def to_fixed(f,e):
 
 def escribir_binario(filename, data_h, data_l, width_coded='<ii'):
     with open(filename, 'ab') as f:
-        data = struct.pack(width_coded, data_h, data_l)
+        # (-32768) <= number <= 32767
+        g = lambda x : x if ((-32768) <= x <= 32767) else (np.sign(x)*32767)
+        data = struct.pack(width_coded, g(data_h), g(data_l))
         f.write(data)
 
 def leer_binario(filename, width_coded='<ii'):
