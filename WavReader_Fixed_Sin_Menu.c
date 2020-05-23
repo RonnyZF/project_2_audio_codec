@@ -16,6 +16,8 @@ Se compila en la maquina virtual con el comandos:
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>       /* clock_t, clock, CLOCKS_PER_SEC */
+
 
 //Modificar
 
@@ -23,7 +25,7 @@ Se compila en la maquina virtual con el comandos:
 //char * Lectura = "Encoder.wav";
 
 char * encoder = "codificar";
-char * Lectura = "Test.wav";
+char * Lectura = "sample_1-8kHz.wav";
 
 //*************************************************
 //*************************************************
@@ -51,6 +53,19 @@ int init  = 22; /*Esta variable es importante, lo que hace es similar a la
                   en el csv generado*/
 
 #define pi  3.1415926535897
+
+
+//***********************************************************************
+//********   FUNCIONES PARA CALCULO DE TIEMPO DE PROCESAMIENTO   ********
+//***********************************************************************
+
+
+int frequency_of_primes (int n) {
+  int i,j;
+  int freq=n-1;
+  for (i=2; i<=n; ++i) for (j=sqrt(i);j>1;--j) if (i%j==0) {--freq; break;}
+  return freq;
+}
 
 //***********************************************************************
 //**********         FUNCIONES PARA PASAR A PUNTO FIJO         **********
@@ -180,6 +195,7 @@ void char_to_complex(char* buff_char, Complex* buff_complex, int len){
             buff_complex[i].im = flo_to_fix(puente_im[i],15);
         }
         
+        /*
         for (int j = 0; j < 64; j++){
             printf("Num original %d: %f + %fi\n"   ,j,fix_to_flo_Forced(buff_char[2],FIXED), fix_to_flo_Forced(buff_char[3],FIXED));
             printf("Num original %d: %ld + %ldi\n" ,j,Aux[j].re               ,Aux[j].im);
@@ -188,6 +204,7 @@ void char_to_complex(char* buff_char, Complex* buff_complex, int len){
             printf("Num Out      %d: %ld + %ldi\n" ,j,buff_complex[j].re, buff_complex[j].im);
             printf("Num Out      %d: %f + %fi\n\n" ,j,(double)buff_complex[j].re/(1<<15), (double)buff_complex[j].im/(1<<15));
         }
+        */
     }
 
     else{}
@@ -307,7 +324,6 @@ void save_fft(Complex* buff_complex, int len){
 void fft(Complex *X, unsigned short EXP,Complex *W, unsigned short SCALE,int Fix){
     int64_t temp_re;         /* Temporary storage of complex variable */
     int64_t temp_im;
-
     int64_t U_re;            /* Twiddle factor W^k */
     int64_t U_im;
 
@@ -315,10 +331,8 @@ void fft(Complex *X, unsigned short EXP,Complex *W, unsigned short SCALE,int Fix
     unsigned short id;      /* Index for lower point in butterfly */
     unsigned short N=1<<EXP;/* Number of points for FFT */
     unsigned short L;       /* FFT stage */
-    
     unsigned short LE;      /* Number of points in sub DFT at stage L and offset 
                                to next DFT in stage */
-    
     unsigned short LE1;     /* Number of butterflies in one DFT at stage L. 
                                Also is offset to lower point in butterfly at stage L */
     int64_t scale;
@@ -337,26 +351,19 @@ void fft(Complex *X, unsigned short EXP,Complex *W, unsigned short SCALE,int Fix
 
         for (j=0; j<LE1;j++){
             /* Do the butterflies */
-            //IMPORTANTE
             for(i=j; i<N; i+=LE) {
                 id=i+LE1;
-                temp_re = X[id].re*U_re/(1<<Fix);
-                temp_re = temp_re - X[id].im*U_im/(1<<Fix);
+                temp_re = X[id].re*U_re/(1<<Fix)- X[id].im*U_im/(1<<Fix);
                 temp_re = temp_re*scale/(1<<Fix);
 
-                temp_im = X[id].im*U_re/(1<<Fix);
-                temp_im = temp_im + X[id].re*U_im/(1<<Fix);
+                temp_im = X[id].im*U_re/(1<<Fix) + X[id].re*U_im/(1<<Fix);
                 temp_im = temp_im*scale/(1<<Fix);
 
                 X[id].re = X[i].re*scale/(1<<Fix) - temp_re;
-                //printf("%d\n",X[id].re);
-                //printf("%f\n\n",(double)X[id].re/(1<<Fix));
-
                 X[id].im = X[i].im*scale/(1<<Fix) - temp_im;
                 X[i].re  = X[i].re*scale/(1<<Fix) + temp_re;
                 X[i].im  = X[i].im*scale/(1<<Fix) + temp_im;
             }
-
             /* Recursive compute W^k as U*W^(k-1) */
             temp_re = (U_re*W[L-1].re/(1<<Fix) - U_im*W[L-1].im/(1<<Fix));
             U_im    = (U_re*W[L-1].im/(1<<Fix) + U_im*W[L-1].re/(1<<Fix));
@@ -460,6 +467,14 @@ int main() {
     W               = malloc((int)EXP * sizeof(Complex));
 
 
+    //Inicializa contador y clock para ver tiempo de ejecucion.
+    clock_t t;
+    int f;
+    t = clock();
+    f = frequency_of_primes (99999);
+    printf ("Inicio de reloj...\n");
+
+
     //Codificador
     if(encoder == "codificar"){
         
@@ -506,7 +521,7 @@ int main() {
                 count++;
             }while(byte_read > 0);
             
-            printf("Se ha escrito la FFT con el wav codificado!, se llama %s\n\n\n",FFT_TO_WAV);
+            printf("Se ha escrito la FFT con el wav codificado!, se llama %s\n",FFT_TO_WAV);
             //Mietras se siga leyendo datos se seguira ejecutando el while
             
             fclose(fp); //Se cierra el archivo cuando se termina de leer
@@ -560,11 +575,16 @@ int main() {
             //Mietras se siga leyendo datos se seguira ejecutando el while
 
             printf("Se ha escrito el csv con la FFT decodificada!, se llama %s\n",IFFT_TO_CSV);
-            printf("Se ha escrito el wav con la FFT decodificada!, se llama %s\n\n\n",IFFT_TO_WAV);
+            printf("Se ha escrito el wav con la FFT decodificada!, se llama %s\n",IFFT_TO_WAV);
 
             fclose(fpFFT); //Se cierra el archivo cuando se termina de leer
         }
     }
 
+
+    //Imprime el tiempo de ejecucion
+    t = clock() - t;
+    printf ("Le tardo al programa %ld clicks completar el proceso (%f segundos).\n\n\n",t,((float)t)/CLOCKS_PER_SEC);
+  
     return 0;
 }
