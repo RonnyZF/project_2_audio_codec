@@ -1,16 +1,15 @@
 # imports
 import math
 import numpy as np
-from py_fft_project2.wave_lib import leer_wave,guardar_wave
-from py_fft_project2.plot import plot_fft, plot_signal
-from py_fft_project2.array_store_read_binary import store_coeffs, read_coeffs
+from first_deliverable.wave_lib import leer_wave,guardar_wave
+from first_deliverable.plot import plot_fft, plot_signal
+from first_deliverable.array_store_read_binary import store_coeffs, read_coeffs
 
 # constantes
-coder_level = 16
+coder_level = 'float16'
 
 settings = {
-    32: {'factor_escala': 22,'fixed_e' : 16,'width_coded':'<ii'},
-    16: {'factor_escala': 22,'fixed_e' : 16-3,'width_coded':'<hh'}
+    'float16': {'factor_escala': 22,'fixed_e' : '','width_coded':'<ee'}
            }
 factor_escala = settings[coder_level]['factor_escala']
 fixed_e = settings[coder_level]['fixed_e']
@@ -27,9 +26,19 @@ fft_vector = np.fft.fft(data)
 
 # aplicando escalamiento
 fft_vector= fft_vector * (2 ** -factor_escala)
+
+import matplotlib.pyplot as plt
+plt.plot(fft_vector.real)
+plt.grid()
+plt.show()
+
+plt.plot(fft_vector.imag)
+plt.grid()
+plt.show()
+
 h, _ = np.split(fft_vector,2)
-store_coeffs(filename='file.mpx', dato=h,fixed_e=fixed_e,width_coded=width_coded)
-recovered = read_coeffs(filename='file.mpx',fixed_e=fixed_e,width_coded=width_coded)
+store_coeffs(filename='file.mpx', dato=h,width_coded=width_coded)
+recovered = read_coeffs(filename='file.mpx',width_coded=width_coded)
 recovered = np.concatenate((recovered,recovered[::-1].conj()))
 
 ifft_vector = np.real(np.fft.ifft(recovered))
