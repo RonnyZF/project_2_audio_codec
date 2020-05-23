@@ -1,9 +1,8 @@
 # imports
 import math
 import numpy as np
-from first_deliverable.wave_lib import leer_wave,guardar_wave
-from first_deliverable.plot import plot_fft, plot_signal
-from first_deliverable.array_store_read_binary import store_coeffs, read_coeffs
+from First_Deliverable_Prototype_and_Test_Vectors.implementacion_python import leer_wave,guardar_wave
+from First_Deliverable_Prototype_and_Test_Vectors.implementacion_python import store_coeffs, read_coeffs
 
 # constantes
 coder_level = 'float16'
