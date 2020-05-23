@@ -3,6 +3,7 @@ import math
 import numpy as np
 from First_Deliverable_Prototype_and_Test_Vectors.implementacion_python.wave_lib import leer_wave,guardar_wave
 from First_Deliverable_Prototype_and_Test_Vectors.implementacion_python.array_store_read_binary import store_coeffs, read_coeffs
+from First_Deliverable_Prototype_and_Test_Vectors.implementacion_python.plot import plot_signal, plot_fft
 
 # constantes
 coder_level = 'float16'
@@ -45,3 +46,5 @@ ifft_vector = np.real(np.fft.ifft(recovered))
 ifft_vector =ifft_vector  * (2 ** (factor_escala))
 
 guardar_wave(file_name='from_ifft.wav', arreglo=ifft_vector, sampleRate=8000,width=2)
+plot_signal(ifft_vector)
+plot_fft(ifft_vector)
