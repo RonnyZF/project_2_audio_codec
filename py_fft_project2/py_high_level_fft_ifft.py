@@ -14,21 +14,12 @@ if size % 2 != 0:
     data=data[:2 ** to_2_pow]
 fft_vector = np.fft.fft(data)
 
-# aplicando normalizacion
 # aplicando escalamiento
 fft_vector= fft_vector * (2 ** -factor_escala)
-
-#store_coeffs(filename='file.mpx', dato=fft_vector)
+h, l = np.split(fft_vector,2)
+store_coeffs(filename='file.mpx', dato=h)
 recovered = read_coeffs(filename='file.mpx')
-
-import matplotlib.pyplot as plt
-plt.plot(fft_vector.real)
-plt.grid()
-plt.show()
-
-plt.plot(fft_vector.imag)
-plt.grid()
-plt.show()
+recovered = np.concatenate((recovered,recovered[::-1].conj()))
 
 ifft_vector = np.real(np.fft.ifft(recovered))
 
