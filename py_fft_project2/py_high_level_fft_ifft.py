@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from py_fft_project2.wave_lib import leer_wave,guardar_wave
 from py_fft_project2.plot import plot_fft, plot_signal
@@ -6,11 +7,13 @@ from py_fft_project2.array_store_read_binary import store_coeffs, read_coeffs
 factor_escala = 22
 
 *_,data = leer_wave('../audio_samples_8kHz/sample_1-8kHz.wav')
+data=np.array(data)
+size = math.log(data.shape[0],2)
+if size % 2 != 0:
+    to_2_pow = math.floor(size)
+    data=data[:2 ** to_2_pow]
 fft_vector = np.fft.fft(data)
 
-def normalize_complex_arr(a):
-    a_oo = a - a.real.min() - 1j*a.imag.min() # origin offsetted
-    return a_oo/np.abs(a_oo).max()
 # aplicando normalizacion
 # aplicando escalamiento
 fft_vector= fft_vector * (2 ** -factor_escala)
