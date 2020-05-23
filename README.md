@@ -3,7 +3,8 @@ Implementación de un Audio Codec en un dispositivo Embebido.
 
 El documento se divide en tre secciones siendo los entregables las carpetas:
 
-1. First_Deliverable_Prototype_and_Test_Vectors
+1. First_Deliverable_Prototype_and_Test_Vectors:
+
   a) Implementación en C
   b) Implementación en Python
   
