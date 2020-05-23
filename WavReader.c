@@ -16,7 +16,7 @@ Se compila en la maquina virtual con el comandos:
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <time.h>       /* clock_t, clock, CLOCKS_PER_SEC */
 
 char* FFT_TO_WAV  = "Encoder.wav";
 char* WAV_TO_CSV  = "Input.csv";
@@ -366,6 +366,26 @@ int main(int argc, char *argv[]) {
     W               = malloc((int)EXP * sizeof(double complex));
 
 
+
+    //Inicializa contador y clock para ver tiempo de ejecucion.
+    clock_t t;
+    int f;
+    t = clock();
+    f = frequency_of_primes (99999);
+    printf ("Inicio de reloj...\n");
+
+    //***********************************************************************
+    //********   FUNCIONES PARA CALCULO DE TIEMPO DE PROCESAMIENTO   ********
+    //***********************************************************************
+
+
+    int frequency_of_primes (int n) {
+      int i,j;
+      int freq=n-1;
+      for (i=2; i<=n; ++i) for (j=sqrt(i);j>1;--j) if (i%j==0) {--freq; break;}
+      return freq;
+    }
+
     //**********************************************************************************
     // ADQUISICION DE ARGUMENTOS
 
@@ -530,10 +550,10 @@ int main(int argc, char *argv[]) {
     }
 
 
-    /*for (int n=0; n<Num; n++){
-        printf("# %d: 0x%04x =  %f = %f",n,buffer_Short[n], creal(buffer_FloatFFT[n]),creal(FFT[n]));
-        printf("  ----  %f = %f\n",cimag(buffer_FloatFFT[n]),cimag(FFT[n]));
-    }*/
+    //Imprime el tiempo de ejecucion
+    t = clock() - t;
+    printf ("Le tardo al programa %ld clicks completar el proceso (%f segundos).\n\n\n",t,((float)t)/CLOCKS_PER_SEC);
+  
 
     return 0;
 }
