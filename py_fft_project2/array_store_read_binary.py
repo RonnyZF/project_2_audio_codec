@@ -40,26 +40,26 @@ def to_fixed(f,e):
         b = b + 1
     return b
 
-def escribir_binario(filename, data_h, data_l):
+def escribir_binario(filename, data_h, data_l, width_coded='<ii'):
     with open(filename, 'ab') as f:
-        data = struct.pack('<ii', data_h, data_l)
+        data = struct.pack(width_coded, data_h, data_l)
         f.write(data)
 
-def leer_binario(filename):
+def leer_binario(filename, width_coded='<ii'):
     with open(filename, 'rb') as f:
         data = f.read()
-    return struct.iter_unpack('<ii',data)
+    return struct.iter_unpack(width_coded,data)
 
-def store_coeffs(filename, dato,fixed_e = 16):
+def store_coeffs(filename, dato,fixed_e = 16,width_coded='<ii'):
     if path.exists(filename):
         os.remove(filename)
     n = [coeficiente._make((i.real, i.imag)) for i in dato]
     for nn in n:
         coef_towrite= coeficiente._make([to_fixed(f=nn.real,e=fixed_e), to_fixed(f=nn.imaginario,e=fixed_e)])
-        escribir_binario(filename=filename, data_h=coef_towrite.real,data_l=coef_towrite.imaginario)
+        escribir_binario(filename=filename, data_h=coef_towrite.real,data_l=coef_towrite.imaginario,width_coded=width_coded)
 
-def read_coeffs(filename, fixed_e = 16):
-    dato = leer_binario(filename=filename)
+def read_coeffs(filename, fixed_e = 16,width_coded='<ii'):
+    dato = leer_binario(filename=filename,width_coded=width_coded)
     coef = [coeficiente._make(i) for i in dato]
     coef_float = [coeficiente._make([to_float(i.real, fixed_e), to_float(i.imaginario, fixed_e)]) for i in coef]
     return np.array([i.real + i.imaginario*1j for i in coef_float])
